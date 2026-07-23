@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng nhập hệ thống - Task Scheduler</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --primary-color: #3b82f6;
+            --text-main: #1f2937;
+            --text-secondary: #6b7280;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-card { background: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 400px; }
+        .login-brand { font-size: 1.25rem; font-weight: bold; color: var(--text-main); margin-bottom: 25px; display: flex; align-items: center; gap: 10px; justify-content: center; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px; }
+        .form-control { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.95rem; outline: none; }
+        .btn-primary { width: 100%; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-primary:hover { opacity: 0.9; }
+        .error-msg { background: #fee2e2; color: #dc2626; padding: 10px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 15px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="login-brand">
+            <i class="fa-solid fa-calendar-days" style="color: var(--primary-color);"></i> Task Scheduler Login
+        </div>
+        
+        {% if error %}
+        <div class="error-msg">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" autocomplete="off">
+            <div class="form-group">
+                <label>Email tài khoản (Gmail)</label>
+                <input type="email" name="email" class="form-control" placeholder="admin@gmail.com" required>
+            </div>
+            <div class="form-group">
+                <label>Mật khẩu</label>
+                <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-primary">Đăng nhập</button>
+        </form>
+    </div>
+
+</body>
+</html>
