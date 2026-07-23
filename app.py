@@ -16,10 +16,10 @@ def init_db():
     conn = get_db()
     cur = conn.cursor()
 
+    # Đã xóa cột msnv khỏi bảng employees
     cur.execute("""
     CREATE TABLE IF NOT EXISTS employees (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        msnv TEXT,
         name TEXT NOT NULL,
         role TEXT NOT NULL,
         email TEXT UNIQUE,
@@ -27,13 +27,6 @@ def init_db():
         is_admin INTEGER DEFAULT 0
     )
     """)
-
-    # Tự động thêm cột msnv nếu bảng employees đã tồn tại từ trước mà chưa có cột này
-    try:
-        cur.execute("ALTER TABLE employees ADD COLUMN msnv TEXT")
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass # Nếu cột đã tồn tại thì bỏ qua không báo lỗi
 
     cur.execute("""
     CREATE TABLE IF NOT EXISTS tasks (
@@ -57,13 +50,13 @@ def init_db():
     cur.execute("SELECT COUNT(*) FROM employees")
     if cur.fetchone()[0] == 0:
         sample_employees = [
-            ("NV001", "Quản trị viên", "Admin", "admin@gmail.com", "123456", 1),
-            ("NV002", "Cao Hoàng Việt", "Trưởng nhóm", "caohoangviet738@gmail.com", "123456", 0),
-            ("NV003", "Lê Gia Thịnh", "Trưởng nhóm", "legiat7@gmail.com", "123456", 0)
+            ("Quản trị viên", "Admin", "admin@gmail.com", "123456", 1),
+            ("Cao Hoàng Việt", "Trưởng nhóm", "caohoangviet738@gmail.com", "123456", 0),
+            ("Lê Gia Thịnh", "Trưởng nhóm", "legiat7@gmail.com", "123456", 0)
         ]
         for emp in sample_employees:
             try:
-                cur.execute("INSERT INTO employees (msnv, name, role, email, password, is_admin) VALUES (?, ?, ?, ?, ?, ?)", emp)
+                cur.execute("INSERT INTO employees (name, role, email, password, is_admin) VALUES (?, ?, ?, ?, ?)", emp)
             except sqlite3.IntegrityError:
                 pass
 
@@ -130,7 +123,6 @@ def home():
         shift = request.form.get("shift")
         
         if employee_id and task_id and date and shift:
-            # KIỂM TRA CHỐNG TRÙNG LỊCH: Chặn nếu nhân viên đã có lịch làm việc trong ngày và ca đó
             cur.execute("""
                 SELECT * FROM schedules 
                 WHERE employee_id = ? AND date = ? AND shift = ?
@@ -209,8 +201,10 @@ def manage_employees():
     conn = get_db()
     cur = conn.cursor()
 
+    error_msg = None
+    success_msg = None
+
     if request.method == "POST":
-        msnv = request.form.get("msnv")
         name = request.form.get("name")
         role = request.form.get("role")
         email = request.form.get("email")
@@ -219,21 +213,23 @@ def manage_employees():
 
         if name and role and email and password:
             try:
+                # Đã loại bỏ msnv khi insert
                 cur.execute("""
-                    INSERT INTO employees (msnv, name, role, email, password, is_admin) 
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """, (msnv, name, role, email, password, is_admin))
+                    INSERT INTO employees (name, role, email, password, is_admin) 
+                    VALUES (?, ?, ?, ?, ?)
+                """, (name, role, email, password, is_admin))
                 conn.commit()
+                success_msg = "Thêm nhân viên thành công!"
             except sqlite3.IntegrityError:
-                pass
-            conn.close()
-            return redirect(url_for("manage_employees"))
+                error_msg = "Lỗi: Email này đã được sử dụng bởi nhân viên khác!"
+        else:
+            error_msg = "Vui lòng điền đầy đủ thông tin!"
 
     cur.execute("SELECT * FROM employees")
     employees = cur.fetchall()
     conn.close()
 
-    return render_template("employees.html", employees=employees, is_admin=session.get("is_admin", 0))
+    return render_template("employees.html", employees=employees, is_admin=session.get("is_admin", 0), error_msg=error_msg, success_msg=success_msg)
 
 @app.route("/delete_employee_page/<int:id>")
 def delete_employee_page(id):
