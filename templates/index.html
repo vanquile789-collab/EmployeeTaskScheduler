@@ -94,6 +94,19 @@
             </div>
 
             {% if is_admin == 1 %}
+            
+            <!-- Hiển thị thông báo khi trùng lịch hoặc thành công -->
+            {% if error_msg %}
+            <div style="background: #fee2e2; color: #dc2626; padding: 12px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; border: 1px solid #fecaca; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.1rem;"></i> <span>{{ error_msg }}</span>
+            </div>
+            {% endif %}
+            {% if success_msg %}
+            <div style="background: #d1fae5; color: #065f46; padding: 12px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; border: 1px solid #a7f3d0; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-check-circle" style="font-size: 1.1rem;"></i> <span>{{ success_msg }}</span>
+            </div>
+            {% endif %}
+
             <div class="dashboard-body">
                 <div class="panel" style="margin-bottom:0;">
                     <div class="panel-title"><i class="fa-solid fa-user-plus"></i> Phân công nhanh (Admin)</div>
@@ -138,7 +151,7 @@
                     </p>
                     <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
                         <strong>Quyền hạn hiện tại:</strong> Quản trị viên tối cao (Admin)<br>
-                        <strong>Trạng thái:</strong> Đang hoạt động an toàn.
+                        <strong>Trạng thái:</strong> Hệ thống tự động chống trùng lịch đang hoạt động.
                     </div>
                 </div>
             </div>

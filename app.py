@@ -16,7 +16,6 @@ def init_db():
     conn = get_db()
     cur = conn.cursor()
 
-    # Tạo bảng Nhân viên có cột msnv (Mã số nhân viên)
     cur.execute("""
     CREATE TABLE IF NOT EXISTS employees (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,13 +47,12 @@ def init_db():
     )
     """)
 
-    # Nạp sẵn dữ liệu mẫu nếu bảng trống
     cur.execute("SELECT COUNT(*) FROM employees")
     if cur.fetchone()[0] == 0:
         sample_employees = [
             ("NV001", "Quản trị viên", "Admin", "admin@gmail.com", "123456", 1),
-            ("NV002", "Nguyễn Văn A", "Kỹ thuật", "nguyenvana@gmail.com", "123456", 0),
-            ("NV003", "Trần Thị B", "Kinh doanh", "tranthib@gmail.com", "123456", 0)
+            ("NV002", "Cao Hoàng Việt", "Trưởng nhóm", "caohoangviet738@gmail.com", "123456", 0),
+            ("NV003", "Lê Gia Thịnh", "Trưởng nhóm", "legiat7@gmail.com", "123456", 0)
         ]
         for emp in sample_employees:
             try:
@@ -114,6 +112,9 @@ def home():
 
     conn = get_db()
     cur = conn.cursor()
+    
+    error_msg = None
+    success_msg = None
 
     if request.method == "POST" and session.get("is_admin") == 1:
         employee_id = request.form.get("employee_id")
@@ -122,13 +123,22 @@ def home():
         shift = request.form.get("shift")
         
         if employee_id and task_id and date and shift:
-            cur.execute(
-                "INSERT INTO schedules (employee_id, task_id, date, shift) VALUES (?, ?, ?, ?)",
-                (employee_id, task_id, date, shift)
-            )
-            conn.commit()
-            conn.close()
-            return redirect(url_for("home"))
+            # KIỂM TRA CHỐNG TRÙNG LỊCH: Chặn nếu nhân viên đã có lịch làm việc trong ngày và ca đó
+            cur.execute("""
+                SELECT * FROM schedules 
+                WHERE employee_id = ? AND date = ? AND shift = ?
+            """, (employee_id, date, shift))
+            existing_schedule = cur.fetchone()
+            
+            if existing_schedule:
+                error_msg = "Nhân viên này đã có lịch làm việc trong ca và ngày này rồi! Không thể phân công trùng."
+            else:
+                cur.execute(
+                    "INSERT INTO schedules (employee_id, task_id, date, shift) VALUES (?, ?, ?, ?)",
+                    (employee_id, task_id, date, shift)
+                )
+                conn.commit()
+                success_msg = "Phân công lịch làm việc thành công!"
 
     today_date = "2025-05-19"
 
@@ -179,7 +189,9 @@ def home():
         employees=employees,
         tasks=tasks,
         schedules=schedules,
-        is_admin=session.get("is_admin", 0)
+        is_admin=session.get("is_admin", 0),
+        error_msg=error_msg,
+        success_msg=success_msg
     )
 
 @app.route("/employees", methods=["GET", "POST"])
