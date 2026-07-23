@@ -28,6 +28,13 @@ def init_db():
     )
     """)
 
+    # Tự động thêm cột msnv nếu bảng employees đã tồn tại từ trước mà chưa có cột này
+    try:
+        cur.execute("ALTER TABLE employees ADD COLUMN msnv TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass # Nếu cột đã tồn tại thì bỏ qua không báo lỗi
+
     cur.execute("""
     CREATE TABLE IF NOT EXISTS tasks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
