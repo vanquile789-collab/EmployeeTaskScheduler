@@ -2,169 +2,125 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý Nhân viên - Task Scheduler</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --bg-color: #f4f6f9;
-            --sidebar-bg: #1e293b;
-            --card-bg: #ffffff;
-            --primary-color: #3b82f6;
-            --danger-color: #ef4444;
-            --success-color: #10b981;
-            --text-main: #1f2937;
-            --text-secondary: #6b7280;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-color); display: flex; height: 100vh; overflow: hidden; }
-        
-        .sidebar { width: 260px; background-color: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; height: 100vh; }
-        .sidebar-brand { padding: 20px; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #334155; }
-        .sidebar-menu { list-style: none; padding: 20px 10px; flex: 1; }
-        .sidebar-menu li { padding: 12px 15px; border-radius: 8px; margin-bottom: 5px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: #94a3b8; transition: 0.2s; }
-        .sidebar-menu li a { color: inherit; text-decoration: none; display: flex; align-items: center; gap: 12px; width: 100%; }
-        .sidebar-menu li.active, .sidebar-menu li:hover { background-color: var(--primary-color); color: #fff; }
-
-        .sidebar-user { margin-top: auto; padding: 15px 20px; border-top: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; background: #0f172a; }
-
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        .header { background: var(--card-bg); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; }
-        .header-title { font-size: 1.25rem; font-weight: bold; color: var(--text-main); }
-        .logout-btn { color: var(--danger-color); text-decoration: none; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
-
-        .container { padding: 25px; display: grid; grid-template-columns: 380px 1fr; gap: 25px; }
-        .panel { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); height: fit-content; }
-        .panel-title { font-size: 1rem; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
-
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px; }
-        .form-control { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; outline: none; }
-        .checkbox-group { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-main); cursor: pointer; }
-        .checkbox-group input { width: 16px; height: 16px; cursor: pointer; }
-
-        .btn-primary { width: 100%; background: var(--success-color); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-primary:hover { opacity: 0.9; }
-
-        .btn-danger { background: var(--danger-color); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
-        .btn-danger:hover { opacity: 0.85; }
-
-        .emp-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .emp-table th, .emp-table td { border: 1px solid #e5e7eb; padding: 12px; text-align: left; vertical-align: middle; }
-        .emp-table th { background-color: #f9fafb; color: var(--text-main); }
-        .badge-admin { background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
-        .badge-staff { background: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý nhân viên - Employee Task Scheduler</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="sidebar">
-        <div class="sidebar-brand"><i class="fa-solid fa-calendar-days"></i> Task Scheduler</div>
-        <ul class="sidebar-menu">
-            <li><a href="/"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>
-            {% if is_admin == 1 %}
-            <li class="active"><a href="/employees"><i class="fa-solid fa-users"></i> Nhân viên</a></li>
-            {% endif %}
-            <li><a href="/tasks"><i class="fa-solid fa-list-check"></i> Công việc</a></li>
-            <li><a href="/schedules"><i class="fa-solid fa-calendar-week"></i> Phân công</a></li>
-            <li><a href="/reports"><i class="fa-solid fa-chart-simple"></i> Báo cáo</a></li>
-            <li><a href="/settings"><i class="fa-solid fa-gear"></i> Cài đặt</a></li>
-        </ul>
-        <div class="sidebar-user">
-            <div style="display: flex; align-items: center; gap: 10px; overflow: hidden;">
-                <i class="fa-solid fa-circle-user" style="font-size: 1.8rem; color: #38bdf8;"></i>
-                <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    <div style="font-size: 0.9rem; font-weight: bold; color: #f8fafc;">{{ session.get('employee_name', 'Người dùng') }}</div>
-                    <small style="font-size: 0.75rem; color: #94a3b8;">{{ session.get('employee_role', 'Nhân viên') }}</small>
-                </div>
-            </div>
-            <a href="/logout" title="Đăng xuất" style="color: #ef4444; font-size: 1.1rem; text-decoration: none; padding: 5px;"><i class="fa-solid fa-right-from-bracket"></i></a>
-        </div>
-    </div>
+<body class="bg-light">
 
-    <div class="main-content">
-        <div class="header">
-            <div class="header-title">Quản lý Nhân sự & Cấp tài khoản Đăng nhập</div>
-            <a href="/logout" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
-        </div>
-
+    <!-- Thanh điều hướng (Navbar) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
         <div class="container">
-            <div class="panel">
-                <div class="panel-title"><i class="fa-solid fa-user-plus"></i> Cấp tài khoản nhân viên</div>
-                <form method="POST">
-                    <div class="form-group">
-                        <label>Mã số nhân viên (MSNV)</label>
-                        <input type="text" name="msnv" class="form-control" placeholder="Ví dụ: NV001..." required>
+            <a class="navbar-brand" href="/">Quản lý Lịch làm việc</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/employees">Nhân viên</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/tasks">Công việc</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/schedules">Lịch phân công</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/reports">Báo cáo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/settings">Cài đặt</a></li>
+                    <li class="nav-item"><a class="nav-link text-danger" href="/logout">Đăng xuất</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="mb-4">Quản lý danh sách nhân viên</h2>
+
+        <!-- Hiển thị thông báo lỗi hoặc thành công nếu có -->
+        {% if error_msg %}
+            <div class="alert alert-danger" role="alert">{{ error_msg }}</div>
+        {% endif %}
+        {% if success_msg %}
+            <div class="alert alert-success" role="alert">{{ success_msg }}</div>
+        {% endif %}
+
+        {% if is_admin == 1 %}
+        <!-- Form thêm nhân viên (Chỉ Admin mới thấy) -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">Thêm nhân viên mới</div>
+            <div class="card-body">
+                <form method="POST" action="/employees">
+                    <div class="mb-3">
+                        <label class="form-label">Họ và tên</label>
+                        <input type="text" name="name" class="form-control" placeholder="Nhập họ tên nhân viên" required>
                     </div>
-                    <div class="form-group">
-                        <label>Họ và tên nhân viên</label>
-                        <input type="text" name="name" class="form-control" placeholder="Ví dụ: Nguyễn Văn A..." required>
+                    <div class="mb-3">
+                        <label class="form-label">Chức vụ</label>
+                        <input type="text" name="role" class="form-control" placeholder="Ví dụ: Nhân viên, Trưởng nhóm..." required>
                     </div>
-                    <div class="form-group">
-                        <label>Chức vụ / Vai trò</label>
-                        <input type="text" name="role" class="form-control" placeholder="Ví dụ: Kỹ thuật, Kế toán..." required>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="Nhập email đăng nhập" required>
                     </div>
-                    <div class="form-group">
-                        <label>Email đăng nhập (Gmail)</label>
-                        <input type="email" name="email" class="form-control" placeholder="nhanvien@gmail.com" required>
+                    <div class="mb-3">
+                        <label class="form-label">Mật khẩu</label>
+                        <input type="password" name="password" class="form-control" placeholder="Nhập mật khẩu" required>
                     </div>
-                    <div class="form-group">
-                        <label>Mật khẩu đăng nhập</label>
-                        <input type="password" name="password" class="form-control" placeholder="Nhập mật khẩu cấp phát..." required>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="is_admin" value="1" class="form-check-input" id="adminCheck">
+                        <label class="form-check-label" for="adminCheck">Cấp quyền Quản trị viên (Admin)</label>
                     </div>
-                    <div class="form-group">
-                        <label class="checkbox-group">
-                            <input type="checkbox" name="is_admin" value="1">
-                            <span>Cấp quyền Quản trị viên (Admin hệ thống)</span>
-                        </label>
-                    </div>
-                    <button type="submit" class="btn-primary">Tạo tài khoản</button>
+                    <button type="submit" class="btn btn-success">Thêm nhân viên</button>
                 </form>
             </div>
+        </div>
+        {% endif %}
 
-            <div class="panel">
-                <div class="panel-title"><i class="fa-solid fa-list"></i> Danh sách tài khoản hệ thống</div>
-                <table class="emp-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>MSNV</th>
-                            <th>Họ tên & Vai trò</th>
-                            <th>Email đăng nhập</th>
-                            <th>Quyền hạn</th>
-                            <th style="text-align: center;">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for emp in employees %}
-                        <tr>
-                            <td>{{ emp.id }}</td>
-                            <td><strong>{{ emp.msnv }}</strong></td>
-                            <td>
-                                <strong>{{ emp.name }}</strong><br>
-                                <small style="color: var(--text-secondary);">{{ emp.role }}</small>
-                            </td>
-                            <td>{{ emp.email }}</td>
-                            <td>
-                                {% if emp.is_admin == 1 %}
-                                <span class="badge-admin">Quản trị viên</span>
-                                {% else %}
-                                <span class="badge-staff">Nhân viên</span>
+        <!-- Bảng danh sách nhân viên -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">Danh sách nhân viên hiện tại</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Họ và tên</th>
+                                <th>Chức vụ</th>
+                                <th>Email</th>
+                                <th>Quyền hạn</th>
+                                {% if is_admin == 1 %}
+                                <th>Thao tác</th>
                                 {% endif %}
-                            </td>
-                            <td style="text-align: center;">
-                                <a href="/delete_employee_page/{{ emp.id }}" class="btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên và tài khoản này?')">
-                                    <i class="fa-solid fa-trash"></i> Xóa
-                                </a>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="6" style="text-align: center; color: var(--text-secondary);">Chưa có nhân viên nào trong hệ thống.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for emp in employees %}
+                            <tr>
+                                <td>{{ emp.id }}</td>
+                                <td>{{ emp.name }}</td>
+                                <td>{{ emp.role }}</td>
+                                <td>{{ emp.email }}</td>
+                                <td>
+                                    {% if emp.is_admin == 1 %}
+                                        <span class="badge bg-danger">Admin</span>
+                                    {% else %}
+                                        <span class="badge bg-primary">Nhân viên</span>
+                                    {% endif %}
+                                </td>
+                                {% if is_admin == 1 %}
+                                <td>
+                                    <a href="/delete_employee_page/{{ emp.id }}" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này không?');">Xóa</a>
+                                </td>
+                                {% endif %}
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Chưa có nhân viên nào trong hệ thống.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
